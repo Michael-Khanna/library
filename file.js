@@ -1,4 +1,3 @@
-console.log(`project unfinished, just hit a roadblock. finished 1-6 but could not add firebase and local Storage`)
 
 let userLibrary = [];
 
@@ -76,12 +75,14 @@ function displayBooks(){
 
 function removeCard(){
   let id = this.getAttribute(`data-id`);
+  userLibrary.splice(parseInt(id), 1);
   let targetCard = document.querySelector(`[data-id = '${id}']`);
   targetCard.parentElement.removeChild(targetCard);
   localStorage.removeItem(`card${id}title`);
   localStorage.removeItem(`card${id}author`);
   localStorage.removeItem(`card${id}pages`);
   localStorage.removeItem(`card${id}read`);
+  updateLocal();
 }
 
 function changeStatus(){
@@ -108,8 +109,17 @@ newBook.addEventListener(`click`, function(){
   addBook(title, author, pages, read);
 })
 
-let ii = localStorage.length / 4
+let ii = localStorage.length / 4; // we have 4 properties per book
 
 for(i = 0; i < ii; i++){
     addBook(localStorage.getItem(`card${i}title`), localStorage.getItem(`card${i}author`), localStorage.getItem(`card${i}pages`), localStorage.getItem(`card${i}read`))
+}
+
+function updateLocal(){
+  for(i = 0; i < userLibrary.length; i++){
+    localStorage.setItem(`card${i}title`, userLibrary[i].title);
+    localStorage.setItem(`card${i}author`, userLibrary[i].author);
+    localStorage.setItem(`card${i}pages`, userLibrary[i].pages);
+    localStorage.setItem(`card${i}read`, userLibrary[i].read);
+  }
 }
