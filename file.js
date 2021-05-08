@@ -1,125 +1,212 @@
-
 let userLibrary = [];
 
+let currentRow = document.querySelector(`#firstRow`);
+let main = document.querySelector(`#main`);
+let newBook = document.querySelector(`#newBook`);
 
-function book(title, author, pages, read){
+function Book(title, author, pages) {
   this.title = title;
   this.author = author;
   this.pages = pages;
-  this.read = read;
+  this.read = false;
+
+  this.ID = Date.now();
+
+  this.addBookToLibrary();
 }
 
-function addBook(title, author, pages, read) {
-  let newBook = new book(title, author, pages, read);
-  userLibrary.push(newBook);
-  displayBooks();
+Book.prototype.addBookToLibrary = function(){
+    userLibrary.push(this);
 }
 
-let firstRow = document.querySelector("#firstRow");
-let booksDisplayed = 0;
-let row = firstRow;
-let main = document.querySelector(`#main`);
-
-function displayBooks(){
-  for(i = booksDisplayed; i < userLibrary.length; i++){
-    let card = document.createElement(`div`);
-    let title = document.createElement(`div`);
-    let author = document.createElement(`div`);
-    let pages = document.createElement(`div`);
-    let read = document.createElement(`div`);
-    let deleteBtn = document.createElement(`button`);
-    let readBtn = document.createElement(`button`);
-    card.setAttribute(`data-id`, `${i}`);
-    deleteBtn.setAttribute(`data-id`, `${i}`);
-    read.setAttribute(`data-id`, `${i}b`);
-    readBtn.setAttribute(`data-id`, `${i}b`);
-    deleteBtn.classList.add(`cardBtns`);
-    readBtn.classList.add(`cardBtns`);
-    deleteBtn.textContent = `Delete Book`;
-    readBtn.textContent = `Read Staus`;
-    card.classList.add(`bookCard`);
-    if(booksDisplayed % 8 == 0 && booksDisplayed >= 8){
-      row = document.createElement(`div`);
-      row.classList.add(`row`);
-      main.appendChild(row);
+let storageModule = (function(){
+  let storageGet = function(){
+    let data = localStorage.getItem(`libraryData`);
+    data = JSON.parse(data);
+    if(data == null){
+      return false;
     }
-    row.appendChild(card);
-    title.classList.add(`infoSlot`);
-    author.classList.add(`infoSlot`);
-    pages.classList.add(`infoSlot`);
-    read.classList.add(`infoSlot`);
-    title.textContent = `${userLibrary[i].title}`;
-    author.textContent = `${userLibrary[i].author}`;
-    pages.textContent = `${userLibrary[i].pages}`;
-    read.textContent = `${userLibrary[i].read}`;
-    if(read.textContent.toLowerCase() == "read"){
-      read.style.color = "#3AA655";
-    } else if (read.textContent.toLowerCase() == "not read"){
-      read.style.color = "#FF355E";
+    for(let i = 0; i < data.length; i++){
+      userLibrary.push(data[i]);
     }
-    deleteBtn.addEventListener(`click`, removeCard);
-    readBtn.addEventListener(`click`, changeStatus)
-    card.appendChild(title);
-    card.appendChild(author);
-    card.appendChild(pages);
-    card.appendChild(read);
-    card.appendChild(deleteBtn);
-    card.appendChild(readBtn);
-    localStorage.setItem(`card${i}title`, title.textContent);
-    localStorage.setItem(`card${i}author`, author.textContent);
-    localStorage.setItem(`card${i}pages`, pages.textContent);
-    localStorage.setItem(`card${i}read`, read.textContent);
-    booksDisplayed++;
+  }
+
+  let storageSet = function(){
+    let data = JSON.stringify(userLibrary);
+    localStorage.setItem(`libraryData`, data);
+  }
+
+  return {
+    storageGet,
+    storageSet,
+  }
+})();
+
+Book.prototype.changeRead = function(){
+
+  this.read = this.read ? false : true ;
+
+  let card = document.querySelector(`[id = '${this.ID}']`);
+  
+  let info = card.querySelector(`[infoType = 'read']`);
+    
+  info.textContent = this.read; 
+
+  storageModule.storageSet();
+}
+
+Book.prototype.delBook = function(){
+  for(let i = 0; i < userLibrary.length; i++){
+    if(userLibrary[i].ID == this.ID){
+      userLibrary.splice(i, 1);
+      break; 
+    }
+  }
+
+  let card = document.querySelector(`[id = '${this.ID}']`);
+  card.parentNode.removeChild(card);
+
+  storageModule.storageSet();
+}
+
+userLibrary.displaySingle = function(book){
+  let div = document.createElement(`div`);
+  div.classList.add(`bookCard`);
+
+  div.setAttribute(`ID`, book.ID);
+
+  for (let key in book){
+    if(key == `addBookToLibrary` || key == `ID` || key == `changeRead` || key == `delBook`){
+      continue;
+    }
+    let info = document.createElement(`div`);
+    info.classList.add(`infoSlot`);
+
+    info.textContent = book[key];
+
+    info.setAttribute(`infoType`, `${key}`);
+
+    let infoHead = document.createElement(`div`);
+    infoHead.classList.add(`infoHeader`);
+
+    infoHead.textContent = key.toUpperCase();
+
+    div.appendChild(infoHead);
+    div.appendChild(info);
+  }
+
+  let btnRow = document.createElement(`div`);
+  btnRow.classList.add(`btnDiv`);
+
+  let delBtn = document.createElement(`button`);
+  delBtn.classList.add(`cardBtns`);
+  delBtn.textContent = `Delete`;
+  delBtn.addEventListener(`click`, function(){
+    book.delBook();
+  });
+  
+  let readBtn = document.createElement(`button`);
+  readBtn.classList.add(`cardBtns`);
+  readBtn.textContent = `Read`;
+  readBtn.style.backgroundColor = `olive`;
+  readBtn.addEventListener(`click`, function(){
+    book.changeRead();
+  });
+
+  btnRow.appendChild(readBtn);
+  btnRow.appendChild(delBtn);
+
+  div.appendChild(btnRow);
+
+  currentRow.appendChild(div);
+
+  if(currentRow.children.length >= 8){
+    currentRow = document.createElement(`div`);
+    currentRow.classList.add(`row`);
+
+    main.appendChild(currentRow);
+  }
+  storageModule.storageSet();
+}
+
+userLibrary.display = function(){
+  for(let i = 0; i < this.length; i++){
+    this.displaySingle(this[i]);
   }
 }
 
-function removeCard(){
-  let id = this.getAttribute(`data-id`);
-  userLibrary.splice(parseInt(id), 1);
-  let targetCard = document.querySelector(`[data-id = '${id}']`);
-  targetCard.parentElement.removeChild(targetCard);
-  localStorage.removeItem(`card${id}title`);
-  localStorage.removeItem(`card${id}author`);
-  localStorage.removeItem(`card${id}pages`);
-  localStorage.removeItem(`card${id}read`);
-  updateLocal();
+let submitPrompt = function(){
+  let prompt = document.querySelector(`.prompt`);
+
+  let inputs = prompt.querySelectorAll(`input`);
+  
+  let values = []
+
+  inputs.forEach(function(input){
+    values.push(input.value);
+  });
+
+  let book = new Book(...values);
+
+  userLibrary.displaySingle(book)
+
+  deletePrompt();
+} 
+
+let deletePrompt = function(){
+  let prompt = document.querySelector(`.prompt`);
+  prompt.parentNode.removeChild(prompt);
 }
 
-function changeStatus(){
-  let id = this.getAttribute(`data-id`);
-  let targetStatus = document.querySelector(`[data-id = '${id}']`);
-  if(targetStatus.textContent.toLowerCase() == `read`){
-    targetStatus.textContent = `Not Read`;
-    targetStatus.style.color = "#FF355E";
-    this.style.backgroundColor = "#3AA655";
-  } else {
-    targetStatus.textContent = `Read`;
-    targetStatus.style.color = "#3AA655";
-    this.style.backgroundColor = "#FF355E";
+let createPrompt = function(){
+  let names = [
+    {name: "Title", type: "text"}, {name: "Author", type: "text"}, {name: "Pages", type: "number"}
+  ]
+
+  let prompt = document.createElement(`div`);
+  prompt.classList.add(`prompt`);
+
+  main.appendChild(prompt);
+
+  for(let i = 0; i < 3; i++){
+    let input = document.createElement(`input`);
+    input.classList.add(`input`);
+
+    input.placeholder = names[i].name;
+    input.type = names[i].type;
+
+    prompt.appendChild(input)   ; 
   }
+
+  let btnDiv = document.createElement(`div`);
+  btnDiv.classList.add(`btnDiv`);
+  btnDiv.style.backgroundColor = "#e3e0cf";
+
+  prompt.appendChild(btnDiv);
+
+  let xButton = document.createElement(`button`);
+  xButton.classList.add(`cardBtns`);
+
+  xButton.textContent = "X";
+  xButton.addEventListener(`click`, deletePrompt);
+
+  let subButton = document.createElement(`button`);
+  subButton.classList.add(`cardBtns`);
+
+  subButton.textContent = "Submit";
+  subButton.style.backgroundColor = "green";
+  subButton.addEventListener(`click`, submitPrompt);
+
+
+  btnDiv.appendChild(subButton);
+  btnDiv.appendChild(xButton);
+  
 }
 
-let newBook = document.querySelector(`#newBook`);
+storageModule.storageGet();
 
-newBook.addEventListener(`click`, function(){
-  let title = prompt(`Title of your book:`);
-  let author = prompt(`Author of your book:`);
-  let pages = parseInt(prompt(`How many pages is this book?`));
-  let read = prompt(`Status of book? (Read or Not Read)`);
-  addBook(title, author, pages, read);
-})
+newBook.addEventListener(`click`, createPrompt);
 
-let ii = localStorage.length / 4; // we have 4 properties per book
+userLibrary.display();
 
-for(i = 0; i < ii; i++){
-    addBook(localStorage.getItem(`card${i}title`), localStorage.getItem(`card${i}author`), localStorage.getItem(`card${i}pages`), localStorage.getItem(`card${i}read`))
-}
-
-function updateLocal(){
-  for(i = 0; i < userLibrary.length; i++){
-    localStorage.setItem(`card${i}title`, userLibrary[i].title);
-    localStorage.setItem(`card${i}author`, userLibrary[i].author);
-    localStorage.setItem(`card${i}pages`, userLibrary[i].pages);
-    localStorage.setItem(`card${i}read`, userLibrary[i].read);
-  }
-}
+//add the new book to the display when submitted, and continue to step 

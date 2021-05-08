@@ -1,20 +1,20 @@
-html{
+html {
   background-color: black;
   color: white;
 }
 
-.row{
-  display:flex;
+.row {
+  display: flex;
   flex-direction: row;
 }
 
-.bookCard{
+.bookCard {
   margin: 10px;
   background-color: white;
   color: black;
   width: 155px;
   height: 240px;
-  font-family: cursive;
+  font-family: 'Playfair Display';
   font-size: 20px;
   display: flex;
   flex-direction: column;
@@ -23,32 +23,62 @@ html{
   align-items: center;
 }
 
-.infoSlot{
+.infoSlot {
   width: 155px;
   height: 50px;
   display: flex;
   justify-content: center;
 }
 
-#btnDiv{
+.infoHeader {
+  width: 140px;
+  height: 25px;
+  text-align: start;
+  font-size: 15px;
+  color: rgb(78, 77, 77);
+}
+
+.btnDiv {
   height: 50px;
   background-color: white;
-  display:flex;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-#newBook{
+#newBook {
   height: 25px;
   color: black;
-  background-color: #a67ff6
+  background-color: #b46a25;
 }
 
-.cardBtns{
+.cardBtns {
   height: 25px;
-  width: 100px;
-  background-color: red;
+  width: 57.5px;
+  background-color: #bb3821;
   display: flex;
   justify-content: center;
-  margin: 1px;
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
+
+.prompt{
+  top: 57px;
+  width: 60%;
+  height: 40%;
+  position: absolute; 
+  background-color: #e3e0cf;
+  z-index: 10;
+  margin-left: 20%;
+  margin-right: 20%;
+  display: flex;
+  flex-direction: column;
+}
+
+.input{
+  width: 80%;
+  margin: 30px 30px 9% 9%;
+  height: 30px;
+  font-size: large;
 }
