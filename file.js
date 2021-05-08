@@ -208,5 +208,3 @@ storageModule.storageGet();
 newBook.addEventListener(`click`, createPrompt);
 
 userLibrary.display();
-
-//add the new book to the display when submitted, and continue to step 
